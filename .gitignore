@@ -1,0 +1,26 @@
+node_modules
+.next
+.env.local
+.env
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+# VSCode
+.vscode
+# Logs
+logs
+*.log
+
+# Coverage
+coverage
+
+# Build
+out
+build
+
+# Editor backups
+*~
+*.swp
