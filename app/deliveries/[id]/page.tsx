@@ -1,8 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
-import Image from "next/image";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isValidRutOrDni } from "@/lib/validators";
 
@@ -29,6 +28,7 @@ export default function DeliveryDetailPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -45,13 +45,36 @@ export default function DeliveryDetailPage() {
     })();
   }, [loading, apiClient, params.id]);
 
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
+    if (preview) URL.revokeObjectURL(preview);
     if (f) {
       setFile(f);
       const url = URL.createObjectURL(f);
       setPreview(url);
+    } else {
+      setFile(null);
+      setPreview(null);
     }
+  }
+
+  function triggerCapture() {
+    fileInputRef.current?.click();
+  }
+
+  function clearPhoto() {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    if (preview) URL.revokeObjectURL(preview);
+    setFile(null);
+    setPreview(null);
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -64,7 +87,7 @@ export default function DeliveryDetailPage() {
       return;
     }
     if (!isValidRutOrDni(receiverDoc)) {
-      setError("El RUT/DNI ingresado no tiene un formato válido.");
+      setError("El RUT/DNI ingresado no tiene un formato valido.");
       return;
     }
     if (!file) {
@@ -94,7 +117,7 @@ export default function DeliveryDetailPage() {
     }
   }
 
-  if (loading) return <div>Verificando sesión...</div>;
+  if (loading) return <div>Verificando sesion...</div>;
 
   if (fetching) return <div>Cargando entrega...</div>;
 
@@ -120,7 +143,7 @@ export default function DeliveryDetailPage() {
           onClick={logout}
           className="text-xs text-red-500 hover:underline"
         >
-          Cerrar sesión
+          Cerrar sesion
         </button>
       </div>
 
@@ -132,7 +155,7 @@ export default function DeliveryDetailPage() {
           Documento esperado: {delivery.customerDocument}
         </p>
         <p>
-          <span className="font-medium">Dirección:</span> {delivery.address}
+          <span className="font-medium">Direccion:</span> {delivery.address}
         </p>
         <p>
           <span className="font-medium">Productos:</span>{" "}
@@ -161,21 +184,40 @@ export default function DeliveryDetailPage() {
             required
           />
           <p className="text-[11px] text-slate-500 mt-1">
-            Se valida formato básico de RUT chileno o DNI argentino.
+            Se valida formato basico de RUT chileno o DNI argentino.
           </p>
         </div>
         <div>
           <label className="block text-sm mb-1">Foto de evidencia</label>
           <input
+            ref={fileInputRef}
             type="file"
             accept="image/*"
             capture="environment"
             onChange={handleFileChange}
-            className="w-full text-sm"
+            className="hidden"
           />
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={triggerCapture}
+              className="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900"
+            >
+              Tomar o subir foto
+            </button>
+            {file && (
+              <button
+                type="button"
+                onClick={clearPhoto}
+                className="rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm"
+              >
+                Cambiar foto
+              </button>
+            )}
+          </div>
           {preview && (
             <div className="mt-2">
-              <p className="text-xs mb-1">Previsualización:</p>
+              <p className="text-xs mb-1">Previsualizacion:</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={preview}
@@ -208,3 +250,4 @@ export default function DeliveryDetailPage() {
     </div>
   );
 }
+
