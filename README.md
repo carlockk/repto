@@ -1,6 +1,6 @@
 # Repto - Módulo de repartidores (Next.js + MongoDB + Cloudinary)
 
-Este proyecto es una PWA sencilla para repartidores, conectada a MongoDB y lista para desplegar en Vercel.
+Este proyecto es una PWA sencilla para repartidores que saca los datos de un programa de seguimiento de pedidos con numero de orden, esas órdenes asocian estados, productos o servicios y todo lo referido al cliente con su número de rut Chileno o dni Argentino, está pensado para ambos paises.
 
 ## Instalación
 
@@ -8,20 +8,6 @@ Este proyecto es una PWA sencilla para repartidores, conectada a MongoDB y lista
 npm install
 npm run dev
 ```
-
-Copia `.env.example` a `.env.local` y completa:
-
-- `MONGODB_URI`
-- `JWT_SECRET`
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-
-## Scripts
-
-- `npm run dev` – entorno de desarrollo
-- `npm run build` – build de producción
-- `npm run start` – servidor de producción
 
 ## Flujo básico
 
