@@ -28,10 +28,18 @@ export async function POST(req: NextRequest, { params }: Params) {
     const receiverName = formData.get("receiverName") as string | null;
     const receiverDocument = formData.get("receiverDocument") as string | null;
     const file = formData.get("file") as File | null;
+    const observation = formData.get("observation") as string | null;
 
-    if (!receiverName || !receiverDocument || !file) {
+    if (!receiverName || !receiverDocument) {
       return NextResponse.json(
         { message: "Faltan datos para registrar la entrega" },
+        { status: 400 }
+      );
+    }
+
+    if (!file && !(observation && observation.toString().trim().length > 0)) {
+      return NextResponse.json(
+        { message: "Sube una foto o deja una observación para completar" },
         { status: 400 }
       );
     }
@@ -56,10 +64,34 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     // Subir imagen a Cloudinary (eliminando la previa si existe)
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let uploadResult: any = null;
+    if (file) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
 
-    if ((delivery as any).proofPhotoId) {
+      if ((delivery as any).proofPhotoId) {
+        try {
+          await cloudinary.uploader.destroy((delivery as any).proofPhotoId as string);
+        } catch (err) {
+          console.warn("No se pudo eliminar la foto previa en Cloudinary", err);
+        }
+      }
+
+      uploadResult = await new Promise<any>((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream(
+            {
+              folder: "repto-entregas",
+              resource_type: "image"
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          )
+          .end(buffer);
+      });
+    }
       try {
         await cloudinary.uploader.destroy((delivery as any).proofPhotoId as string);
       } catch (err) {

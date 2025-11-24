@@ -25,9 +25,11 @@ export default function DeliveryDetailPage() {
 
   const [receiverName, setReceiverName] = useState("");
   const [receiverDoc, setReceiverDoc] = useState("");
+  const [observation, setObservation] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -91,7 +93,7 @@ export default function DeliveryDetailPage() {
       return;
     }
     if (!file) {
-      setError("Debes subir una foto como evidencia de la entrega.");
+      setError("Debes subir una foto o dejar una observación para completar.");
       return;
     }
 
@@ -101,12 +103,20 @@ export default function DeliveryDetailPage() {
       const formData = new FormData();
       formData.append("receiverName", receiverName);
       formData.append("receiverDocument", receiverDoc);
-      formData.append("file", file);
-      const res = await client.post(`/api/deliveries/${delivery._id}/complete`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      if (file) {
+        formData.append("file", file);
+      }
+      if (observation.trim()) {
+        formData.append("observation", observation.trim());
+      }
+      // Dejamos que el browser setee el boundary del multipart
+      const res = await client.post(
+        `/api/deliveries/${delivery._id}/complete`,
+        formData
+      );
       if (res.data?.ok) {
-        router.replace("/deliveries");
+        setSuccess(true);
+        setTimeout(() => router.replace("/deliveries"), 800);
       } else {
         setError("No se pudo registrar la entrega, intenta nuevamente.");
       }
@@ -232,12 +242,28 @@ export default function DeliveryDetailPage() {
             {error}
           </p>
         )}
+        {success && (
+          <p className="text-sm text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-md px-2 py-1">
+            Entrega registrada con â€¡xito. Redirigiendo...
+          </p>
+        )}
+
+        <div>
+          <label className="block text-sm mb-1">Observación (opcional)</label>
+          <textarea
+            className="w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900"
+            rows={3}
+            value={observation}
+            onChange={(e) => setObservation(e.target.value)}
+            placeholder="Ej: Cliente no estaba, se reagenda / se dejó con conserje / domicilio cerrado..."
+          />
+        </div>
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || success}
           className="w-full rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 transition disabled:opacity-60"
         >
-          {saving ? "Guardando..." : "Confirmar entrega"}
+          {saving ? "Guardando..." : success ? "Listo" : "Confirmar entrega"}
         </button>
         <button
           type="button"

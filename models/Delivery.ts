@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 export type DeliveryStatus = "pendiente" | "en_ruta" | "entregado" | "no_entregado";
 
 export interface IDelivery extends Document {
-  orderId: string; // id de la orden del sistema de seguimiento
+  orderId?: string; // id de la orden del sistema de seguimiento
   trackingCode: string; // código que ve el cliente
   customerName: string;
   customerDocument: string; // RUT o DNI esperado
@@ -16,11 +16,12 @@ export interface IDelivery extends Document {
   receiverName?: string;
   receiverDocument?: string;
   deliveredAt?: Date;
+  observation?: string;
 }
 
 const DeliverySchema = new Schema<IDelivery>(
   {
-    orderId: { type: String, required: true },
+    orderId: { type: String, required: false, default: "" },
     trackingCode: { type: String, required: true },
     customerName: { type: String, required: true },
     customerDocument: { type: String, required: true },
@@ -36,7 +37,8 @@ const DeliverySchema = new Schema<IDelivery>(
     proofPhotoId: { type: String },
     receiverName: { type: String },
     receiverDocument: { type: String },
-    deliveredAt: { type: Date }
+    deliveredAt: { type: Date },
+    observation: { type: String }
   },
   { timestamps: true }
 );
