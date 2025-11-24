@@ -90,7 +90,7 @@ export default function DeliveriesPage() {
           </p>
           <h1 className="text-xl font-semibold leading-tight">Mis entregas</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Revisa y gestiona las ordenes asignadas.
+            Revisa y gestiona las ordenes asignadas
           </p>
         </div>
         <div className="flex items-center gap-2">
