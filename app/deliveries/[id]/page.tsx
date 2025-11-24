@@ -93,7 +93,7 @@ export default function DeliveryDetailPage() {
       return;
     }
     if (!file) {
-      setError("Debes subir una foto o dejar una observación para completar.");
+      setError("Debes subir una foto o dejar una observaciÃ³n para completar.");
       return;
     }
 
@@ -244,18 +244,18 @@ export default function DeliveryDetailPage() {
         )}
         {success && (
           <p className="text-sm text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-md px-2 py-1">
-            Entrega registrada con â€¡xito. Redirigiendo...
+            Entrega registrada con Ã©xito.
           </p>
         )}
 
         <div>
-          <label className="block text-sm mb-1">Observación (opcional)</label>
+          <label className="block text-sm mb-1">ObservaciÃ³n (opcional)</label>
           <textarea
             className="w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900"
             rows={3}
             value={observation}
             onChange={(e) => setObservation(e.target.value)}
-            placeholder="Ej: Cliente no estaba, se reagenda / se dejó con conserje / domicilio cerrado..."
+            placeholder="Ej: Cliente no estaba, se reagenda / se dejÃ³ con conserje / domicilio cerrado..."
           />
         </div>
         <button

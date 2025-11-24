@@ -39,14 +39,14 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     if (!file && !(observation && observation.toString().trim().length > 0)) {
       return NextResponse.json(
-        { message: "Sube una foto o deja una observaci�n para completar" },
+        { message: "Sube una foto o deja una observación para completar" },
         { status: 400 }
       );
     }
 
     if (!isValidRutOrDni(receiverDocument)) {
       return NextResponse.json(
-        { message: "Formato de RUT/DNI inválido" },
+        { message: "Formato de RUT/DNI invÃ¡lido" },
         { status: 400 }
       );
     }
@@ -92,37 +92,21 @@ export async function POST(req: NextRequest, { params }: Params) {
           .end(buffer);
       });
     }
-      try {
-        await cloudinary.uploader.destroy((delivery as any).proofPhotoId as string);
-      } catch (err) {
-        console.warn("No se pudo eliminar la foto previa en Cloudinary", err);
-      }
+
+    if (uploadResult) {
+      (delivery as any).proofPhotoUrl = uploadResult.secure_url;
+      (delivery as any).proofPhotoId = uploadResult.public_id;
+      delivery.status = "entregado";
+      delivery.deliveredAt = new Date();
     }
-
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "repto-entregas",
-            resource_type: "image"
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        )
-        .end(buffer);
-    });
-
-    delivery.status = "entregado";
     delivery.receiverName = receiverName;
     delivery.receiverDocument = receiverDocument;
-    (delivery as any).proofPhotoUrl = uploadResult.secure_url;
-    (delivery as any).proofPhotoId = uploadResult.public_id;
-    delivery.deliveredAt = new Date();
+    if (observation && observation.toString().trim().length > 0) {
+      (delivery as any).observation = observation.toString().trim();
+    }
     await delivery.save();
 
-    // TODO: aquí puedes llamar a tu backend de "seguimiento"
+    // TODO: aquÃ­ puedes llamar a tu backend de "seguimiento"
     // para actualizar el estado de la orden usando delivery.orderId o trackingCode.
 
     return NextResponse.json({ ok: true }, { status: 200 });
